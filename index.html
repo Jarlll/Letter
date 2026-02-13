@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Letter</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            :root {
+                --bg-color: #aaa;
+                --envelope-inside: #ddd;
+                --envelope-main: #ffffff;
+                --envelope-sides: #f7f7f7;
+                --heart-red: #e63946;
+                --text-pink: #d63384;
+            }
+
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-color: var(--bg-color);
+                margin: 0;
+                font-family: "Segoe UI", sans-serif;
+                overflow: hidden;
+                transition: background-color 0.5s ease-in-out;
+            }
+
+            @font-face {
+                font-family: "lr";
+                src: url(LR.otf) format("opentype");
+            }
+            @font-face {
+                font-family: "sb";
+                src: url(SB.otf) format("opentype");
+            }
+
+            .envelope-wrapper {
+                position: relative;
+                cursor: pointer;
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .envelope-wrapper:hover {
+                transform: scale(1.05);
+            }
+
+            .envelope {
+                position: relative;
+                top: 5vh;
+                width: 300px;
+                height: 190px;
+                background-color: var(--envelope-inside);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+                border-radius: 2px;
+            }
+
+            .flap {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 0;
+                height: 0;
+                border-left: 150px solid transparent;
+                border-right: 150px solid transparent;
+                border-top: 125px solid var(--envelope-main);
+                transform-origin: top;
+                z-index: 5;
+                transition:
+                    transform 0.4s ease-in-out 0.6s,
+                    z-index 0.4s step-start 0.6s,
+                    filter 1.6s ease-in-out;
+                filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.4));
+                border-radius: 2px;
+            }
+
+            .pocket {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 0;
+                height: 0;
+                border-left: 150px solid transparent;
+                border-right: 150px solid transparent;
+                border-bottom: 110px solid var(--envelope-main);
+                z-index: 4;
+                filter: drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.1));
+                border-radius: 2px;
+            }
+
+            .side-folds {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 300px;
+                height: 190px;
+                z-index: 3;
+                border-radius: 2px;
+            }
+
+            .side-folds::before {
+                content: "";
+                position: absolute;
+                left: 0;
+                border-left: 145px solid var(--envelope-sides); /* Slight variation for depth */
+                border-top: 95px solid transparent;
+                border-bottom: 95px solid transparent;
+                border-radius: 2px;
+                filter: drop-shadow(2px 0 2px rgba(0, 0, 0, 0.1));
+            }
+
+            .side-folds::after {
+                content: "";
+                position: absolute;
+                right: 0;
+                border-right: 145px solid var(--envelope-sides);
+                border-top: 95px solid transparent;
+                border-bottom: 95px solid transparent;
+                border-radius: 2px;
+                filter: drop-shadow(-2px 0 2px rgba(0, 0, 0, 0.1));
+            }
+
+            .letter {
+                position: absolute;
+                bottom: 10px;
+                left: 50%;
+                transform: translate(-50%, 0);
+                width: 95%;
+                height: 90%;
+                background: white;
+                border-radius: 5px;
+                padding: 20px;
+                box-sizing: border-box;
+                text-align: center;
+                box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+                z-index: 2;
+                transition:
+                    transform 0.6s ease-in-out,
+                    z-index 0.6s step-start;
+            }
+
+            .letter h2 {
+                font-family: "sb";
+                font-size: 1rem;
+                color: var(--text-pink);
+                margin: 15px 0 10px 0;
+                text-align: left;
+            }
+            .letter h3 {
+                font-family: "sb";
+                font-size: 0.8rem;
+                color: var(--text-pink);
+                margin: 5px 0 0 0;
+                text-align: center;
+            }
+            .letter p {
+                font-family: "lr";
+                font-size: 0.6rem;
+                color: #555;
+                text-align: left;
+                text-indent: 2em;
+                padding: 0 5px;
+            }
+            #sender {
+                text-align: right;
+                margin: 0 0 5px 0;
+            }
+
+            .envelope-wrapper.open .flap {
+                transform: rotateX(180deg);
+                z-index: 1;
+                transition:
+                    transform 0.4s ease-in-out,
+                    z-index 0.4s step-end;
+            }
+
+            .envelope-wrapper.open .letter {
+                transform: translate(-50%, -70%);
+                z-index: 10;
+                transition:
+                    transform 0.6s ease-in-out 0.4s,
+                    z-index 0.6s step-end 0.4s;
+            }
+            .seal {
+                position: absolute;
+                top: 85px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 55px;
+                height: 55px;
+                z-index: 6;
+                transition:
+                    transform 0.3s,
+                    opacity 0.3s ease-in-out;
+                pointer-events: none;
+            }
+            .inst {
+                position: absolute;
+                bottom: 15px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 7;
+                font-size: 0.5rem;
+                color: #555;
+            }
+            .flower {
+                position: absolute;
+                width: 40px;
+                height: 35px;
+                z-index: 3;
+            }
+            .flower:nth-child(1) {
+                top: 15px;
+                right: 15px;
+            }
+            .flower:nth-child(2) {
+                bottom: 15px;
+                left: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <audio src="HVD.mp3" id="vm"></audio>
+        <audio src="letter.mp3" id="open-sound"></audio>
+        <audio src="seal.mp3" id="sealed"></audio>
+
+        <div class="envelope-wrapper" id="envelope">
+            <div class="envelope">
+                <div class="flap"></div>
+                <img src="seal.png" alt="" class="seal" />
+
+                <pre class="inst">Click to Open</pre>
+
+                <div class="letter">
+                    <img src="flower.png" alt="" class="flower" />
+                    <img src="flower2.png" alt="" class="flower" />
+                    <h2>Dear, Ma</h2>
+                    <p>
+                        I just want you to know that we are so grateful for all
+                        of your patience, hard work, and sacrifices for us, You
+                        are the best mom that anyone could ever have. We will
+                        always love and support you, even through highs and
+                        lows. Let's build more memories and enjoy our lives
+                        together.
+                    </p>
+                    <h3>Happy Valentine's Day!</h3>
+                    <p id="sender">— Dyabois</p>
+                </div>
+
+                <div class="side-folds"></div>
+                <div class="pocket"></div>
+            </div>
+        </div>
+
+        <script>
+            const envelope = document.getElementById("envelope");
+            const seal = document.querySelector(".seal");
+            const audio = document.getElementById("open-sound");
+            const vm = document.getElementById("vm");
+            const close = document.getElementById("sealed");
+            const inst = document.querySelector(".inst");
+
+            envelope.addEventListener("click", () => {
+                envelope.classList.toggle("open");
+                const isOpen = envelope.classList.contains("open");
+                if (!isOpen) {
+                    vm.pause();
+                    sealed.currentTime = 3;
+                    sealed.play();
+                        document.querySelector('.flap').style.filter = "drop-shadow(0 5px 5px rgba(0, 0, 0, 0.4))";
+                    setTimeout(() => {
+                        seal.style.transform = "translateX(-50%) scale(1)";
+                        inst.innerText = "Click to Open";
+                        document.body.style.backgroundColor = "var(--bg-color)";
+                    }, 1000);
+                } else {
+                    seal.style.transform = "translateX(-50%) scale(0)";
+                    audio.currentTime = 1.6;
+                    audio.play();
+                    setTimeout(() => {
+                        vm.play();
+                        inst.innerText = "Click to Close";
+                        document.body.style.backgroundColor = "pink";
+                        document.querySelector('.flap').style.filter = "none";
+                    }, 400);
+                }
+            });
+        </script>
+    </body>
+</html>
